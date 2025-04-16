@@ -2,69 +2,87 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Jogo da Memória</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Jogo da Memória - Mobile</title>
   <style>
     body {
-      font-family: sans-serif;
-      background: #f0f8ff;
+      margin: 0;
+      padding: 0;
+      background: #e3f2fd;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      margin: 0;
-      padding: 10px;
-    }
-    h1 {
-      margin-bottom: 10px;
-    }
-    #game {
-      display: grid;
-      grid-template-columns: repeat(4, 80px);
-      gap: 10px;
       justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      font-family: sans-serif;
     }
-    .card {
-      width: 80px;
-      height: 80px;
+
+    #card-container {
+      width: 80vw;
+      max-width: 300px;
+      aspect-ratio: 1 / 1;
       perspective: 1000px;
-      cursor: pointer;
+      margin-bottom: 20px;
     }
-    .inner {
+
+    .card {
       width: 100%;
       height: 100%;
       position: relative;
       transform-style: preserve-3d;
-      transition: transform 0.5s;
+      transition: transform 0.6s;
+      cursor: pointer;
     }
-    .card.flipped .inner {
+
+    .flipped {
       transform: rotateY(180deg);
     }
-    .front, .back {
+
+    .face {
       position: absolute;
       width: 100%;
       height: 100%;
       backface-visibility: hidden;
-      border-radius: 10px;
+      border-radius: 12px;
       overflow: hidden;
     }
+
     .front {
+      z-index: 2;
+    }
+
+    .back {
       transform: rotateY(180deg);
     }
-    button {
-      margin-top: 20px;
+
+    #music-btn {
       padding: 10px 20px;
       font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      background-color: #42a5f5;
+      color: white;
     }
   </style>
 </head>
 <body>
 
-  <h1>Jogo da Memória</h1>
-  <div id="game"></div>
-  <button onclick="toggleMusic()">🎵 Tocar Música</button>
+  <div id="card-container">
+    <div class="card" id="card" onclick="flipAndNext()">
+      <div class="face front">
+        <img id="front-img" src="" style="width: 100%; height: 100%;" />
+      </div>
+      <div class="face back">
+        <img id="back-img" src="" style="width: 100%; height: 100%;" />
+      </div>
+    </div>
+  </div>
+
+  <button id="music-btn" onclick="toggleMusic()">🎵 Música</button>
+
   <audio id="bgMusic" loop>
     <source src="musica.mp3" type="audio/mpeg" />
-    Seu navegador não suporta áudio.
   </audio>
 
   <script>
@@ -81,62 +99,37 @@
       { id: "10", src: "20.png" }
     ];
 
-    const cards = [...imagesA, ...imagesB]
-      .sort(() => Math.random() - 0.5)
-      .map(data => ({
-        id: data.id,
-        img: data.src
-      }));
+    const pairedCards = imagesA.map(front => ({
+      id: front.id,
+      front: front.src,
+      back: imagesB.find(back => back.id === front.id).src
+    }));
 
-    const game = document.getElementById('game');
+    let currentIndex = 0;
+    const frontImg = document.getElementById("front-img");
+    const backImg = document.getElementById("back-img");
+    const card = document.getElementById("card");
 
-    let firstCard = null;
-    let lock = false;
+    function showCard(index) {
+      const cardData = pairedCards[index];
+      frontImg.src = cardData.front;
+      backImg.src = cardData.back;
+      card.classList.remove("flipped");
+    }
 
-    cards.forEach((cardData, index) => {
-      const card = document.createElement('div');
-      card.classList.add('card');
-      card.dataset.id = cardData.id;
+    function flipAndNext() {
+      if (card.classList.contains("flipped")) return;
+      card.classList.add("flipped");
 
-      const inner = document.createElement('div');
-      inner.classList.add('inner');
-
-      const front = document.createElement('div');
-      front.classList.add('front');
-      front.innerHTML = `<img src="${cardData.img}" width="80" height="80">`;
-
-      const back = document.createElement('div');
-      back.classList.add('back');
-      back.innerHTML = `<img src="back.png" width="80" height="80">`;
-
-      inner.appendChild(front);
-      inner.appendChild(back);
-      card.appendChild(inner);
-
-      card.addEventListener('click', () => {
-        if (lock || card.classList.contains('flipped')) return;
-
-        card.classList.add('flipped');
-
-        if (!firstCard) {
-          firstCard = card;
+      setTimeout(() => {
+        currentIndex++;
+        if (currentIndex < pairedCards.length) {
+          showCard(currentIndex);
         } else {
-          if (firstCard.dataset.id === card.dataset.id) {
-            firstCard = null;
-          } else {
-            lock = true;
-            setTimeout(() => {
-              firstCard.classList.remove('flipped');
-              card.classList.remove('flipped');
-              firstCard = null;
-              lock = false;
-            }, 1000);
-          }
+          alert("🏁 Fim do jogo!");
         }
-      });
-
-      game.appendChild(card);
-    });
+      }, 1000);
+    }
 
     function toggleMusic() {
       const audio = document.getElementById("bgMusic");
@@ -146,6 +139,9 @@
         audio.pause();
       }
     }
+
+    // Iniciar jogo
+    showCard(currentIndex);
   </script>
 </body>
 </html>
