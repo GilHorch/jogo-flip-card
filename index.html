@@ -1,97 +1,106 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>Jogo da Memória - Mobile</title>
+  <meta charset="UTF-8" /> <!-- Define o padrão de caracteres como UTF-8 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" /> <!-- Faz o layout responsivo para mobile -->
+  <title>Jogo da Memória - Mobile</title> <!-- Título da aba do navegador -->
+
   <style>
     body {
-      margin: 0;
-      padding: 0;
-      background: #e3f2fd;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      overflow: hidden;
-      font-family: sans-serif;
+      margin: 0; /* Remove margem da página */
+      padding: 0; /* Remove padding da página */
+      background: #e3f2fd; /* Cor de fundo azul clara */
+      display: flex; /* Usa flexbox para centralizar os elementos */
+      flex-direction: column; /* Coloca os elementos em coluna */
+      justify-content: center; /* Centraliza verticalmente */
+      align-items: center; /* Centraliza horizontalmente */
+      height: 100vh; /* Altura da tela toda */
+      overflow: hidden; /* Oculta qualquer rolagem */
+      font-family: sans-serif; /* Fonte da página */
     }
 
     #card-container {
-      width: 80vw;
-      max-width: 300px;
-      aspect-ratio: 1 / 1;
-      perspective: 1000px;
-      margin-bottom: 20px;
+    width: 70vw;         /* Largura em relação à tela */
+  height: 90vw;        /* Altura maior, cria o retângulo */
+  max-width: 300px;    /* Limite de largura */
+  max-height: 400px;   /* Limite de altura */
+  perspective: 1000px; /* Mantém o efeito 3D */
+  margin-bottom: 20px;
     }
 
     .card {
-      width: 100%;
-      height: 100%;
-      position: relative;
-      transform-style: preserve-3d;
-      transition: transform 0.6s;
-      cursor: pointer;
+      width: 100%; /* Ocupa 100% da largura do container */
+      height: 100%; /* Ocupa 100% da altura do container */
+      position: relative; /* Necessário para posicionamento das faces */
+      transform-style: preserve-3d; /* Mantém efeito 3D durante rotação */
+      transition: transform 0.6s; /* Suaviza a rotação */
+      cursor: pointer; /* Cursor de mão ao tocar */
     }
 
     .flipped {
-      transform: rotateY(180deg);
+      transform: rotateY(180deg); /* Gira a carta para mostrar o verso */
     }
 
     .face {
-      position: absolute;
+      position: absolute; /* Sobrepõe as faces */
       width: 100%;
       height: 100%;
-      backface-visibility: hidden;
-      border-radius: 12px;
-      overflow: hidden;
+      backface-visibility: hidden; /* Esconde o outro lado da carta */
+      border-radius: 12px; /* Cantos arredondados */
+      overflow: hidden; /* Oculta conteúdo excedente */
     }
 
     .front {
-      z-index: 2;
+      z-index: 2; /* Mantém a frente por cima quando não virada */
     }
 
     .back {
-      transform: rotateY(180deg);
+      transform: rotateY(180deg); /* Vira o verso para ser mostrado quando a carta gira */
     }
 
     #music-btn {
-      padding: 10px 20px;
-      font-size: 16px;
-      border: none;
-      border-radius: 8px;
-      background-color: #42a5f5;
-      color: white;
+      padding: 10px 20px; /* Espaçamento interno */
+      font-size: 16px; /* Tamanho do texto */
+      border: none; /* Remove borda padrão */
+      border-radius: 8px; /* Bordas arredondadas */
+      background-color: #42a5f5; /* Azul vibrante */
+      color: white; /* Texto branco */
     }
   </style>
 </head>
+
 <body>
 
+  <!-- Container que abriga a carta -->
   <div id="card-container">
-    <div class="card" id="card" onclick="flipAndNext()">
+    <div class="card" id="card" onclick="flipAndNext()"> <!-- Ao clicar na carta, executa flipAndNext -->
       <div class="face front">
-        <img id="front-img" src="" style="width: 100%; height: 100%;" />
+        <img id="front-img" src="" style="width: 100%; height: 100%;" /> <!-- Imagem da frente da carta -->
       </div>
       <div class="face back">
-        <img id="back-img" src="" style="width: 100%; height: 100%;" />
+        <img id="back-img" src="" style="width: 100%; height: 100%;" /> <!-- Imagem do verso da carta -->
       </div>
     </div>
   </div>
 
+  <!-- Botão para ativar/desativar música de fundo -->
   <button id="music-btn" onclick="toggleMusic()">🎵 Música</button>
 
+  <!-- Elemento de áudio com música em loop -->
   <audio id="bgMusic" loop>
-    <source src="musica.mp3" type="audio/mpeg" />
+    <source src="musica.mp3" type="audio/mpeg" /> <!-- Caminho da música de fundo -->
   </audio>
 
   <script>
+    // Lista das imagens da frente das cartas
     const imagesA = [
       { id: "1", src: "1.png" }, { id: "2", src: "3.png" }, { id: "3", src: "5.png" },
       { id: "4", src: "7.png" }, { id: "5", src: "9.png" }, { id: "6", src: "11.png" },
       { id: "7", src: "13.png" }, { id: "8", src: "15.png" }, { id: "9", src: "17.png" },
       { id: "10", src: "19.png" }
     ];
+
+    // Lista das imagens do verso das cartas (pares com mesmo ID)
     const imagesB = [
       { id: "1", src: "2.png" }, { id: "2", src: "4.png" }, { id: "3", src: "6.png" },
       { id: "4", src: "8.png" }, { id: "5", src: "10.png" }, { id: "6", src: "12.png" },
@@ -99,48 +108,53 @@
       { id: "10", src: "20.png" }
     ];
 
+    // Junta a frente e verso em pares (mesmo ID)
     const pairedCards = imagesA.map(front => ({
       id: front.id,
       front: front.src,
       back: imagesB.find(back => back.id === front.id).src
     }));
 
-    let currentIndex = 0;
-    const frontImg = document.getElementById("front-img");
-    const backImg = document.getElementById("back-img");
-    const card = document.getElementById("card");
+    let currentIndex = 0; // Índice da carta atual sendo mostrada
+    const frontImg = document.getElementById("front-img"); // Elemento da imagem da frente
+    const backImg = document.getElementById("back-img");   // Elemento da imagem do verso
+    const card = document.getElementById("card");          // Elemento da carta
 
+    // Exibe a carta atual na tela
     function showCard(index) {
-      const cardData = pairedCards[index];
-      frontImg.src = cardData.front;
-      backImg.src = cardData.back;
-      card.classList.remove("flipped");
+      const cardData = pairedCards[index];       // Dados da carta atual
+      frontImg.src = cardData.front;             // Define imagem da frente
+      backImg.src = cardData.back;               // Define imagem do verso
+      card.classList.remove("flipped");          // Garante que esteja na posição original
     }
 
+    // Vira a carta e avança para a próxima
     function flipAndNext() {
-      if (card.classList.contains("flipped")) return;
-      card.classList.add("flipped");
+      if (card.classList.contains("flipped")) return; // Impede duplo clique
+      card.classList.add("flipped"); // Adiciona classe para virar a carta
 
+      // Após 1 segundo, avança para a próxima carta
       setTimeout(() => {
-        currentIndex++;
+        currentIndex++; // Vai para a próxima carta
         if (currentIndex < pairedCards.length) {
-          showCard(currentIndex);
+          showCard(currentIndex); // Mostra a nova carta
         } else {
-          alert("🏁 Fim do jogo!");
+          alert("🏁 Fim do jogo!"); // Mostra alerta se todas acabaram
         }
       }, 1000);
     }
 
+    // Ativa ou pausa a música de fundo
     function toggleMusic() {
-      const audio = document.getElementById("bgMusic");
+      const audio = document.getElementById("bgMusic"); // Elemento de áudio
       if (audio.paused) {
-        audio.play();
+        audio.play(); // Toca a música
       } else {
-        audio.pause();
+        audio.pause(); // Pausa a música
       }
     }
 
-    // Iniciar jogo
+    // Inicia o jogo mostrando a primeira carta
     showCard(currentIndex);
   </script>
 </body>
