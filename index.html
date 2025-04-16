@@ -85,6 +85,8 @@
 
   <!-- Botão para ativar/desativar música de fundo -->
   <button id="music-btn" onclick="toggleMusic()">🎵 Música</button>
+<!-- Controle de volume -->
+<input type="range" id="volume-slider" min="0" max="1" step="0.01" value="1" style="width: 150px; margin-top: 10px;" />
 
   <!-- Elemento de áudio com música em loop -->
   <audio id="bgMusic" loop>
@@ -92,6 +94,16 @@
   </audio>
 
   <script>
+
+    // Elemento do slider de volume
+const volumeSlider = document.getElementById("volume-slider");
+const bgMusic = document.getElementById("bgMusic");
+
+// Quando o usuário mover o slider, ajusta o volume do áudio
+volumeSlider.addEventListener("input", function () {
+  bgMusic.volume = this.value;
+});
+
     // Lista das imagens da frente das cartas
     const imagesA = [
       { id: "1", src: "1.png" }, { id: "2", src: "3.png" }, { id: "3", src: "5.png" },
